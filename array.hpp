@@ -32,8 +32,14 @@ struct ArrayTraits<T, 0>
 template <typename T, size_t S>
 struct Array
 {
-    typedef T* iterator;
-    typedef const T* const_iterator;
+    typedef T value_type;
+    typedef size_t size_type;
+    typedef value_type* pointer;
+    typedef const value_type* const_pointer;
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
+    typedef value_type* iterator;
+    typedef const value_type* const_iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
@@ -49,17 +55,36 @@ struct Array
     constexpr reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
     constexpr const_reverse_iterator rend() const noexcept { return reverse_iterator(begin()); }
 
-    constexpr T& front() noexcept { return m_elements[0]; }
-    constexpr const T& front() const noexcept { return m_elements[0]; }
+    constexpr reference front() noexcept { return m_elements[0]; }
+    constexpr const_reference front() const noexcept { return m_elements[0]; }
 
-    constexpr T& back() noexcept { return m_elements[S - 1]; }
-    constexpr const T& back() const noexcept { return m_elements[S - 1]; }
+    constexpr reference back() noexcept { return m_elements[S - 1]; }
+    constexpr const_reference back() const noexcept { return m_elements[S - 1]; }
 
-    constexpr size_t size() const noexcept { return S; }
+    constexpr size_type size() const noexcept { return S; }
     constexpr bool empty() const noexcept { return S; }
 
-    constexpr T* data() noexcept { return m_elements; }
-    constexpr const T* data() const noexcept { return m_elements; }
+    constexpr pointer data() noexcept { return m_elements; }
+    constexpr const_pointer data() const noexcept { return m_elements; }
+
+    constexpr reference at(size_t index)
+    {
+        if (index >= S)
+            throw std::out_of_range("Array::at: index >= S\n");
+
+        return m_elements[index];
+    }
+
+    constexpr const_reference at(size_t index) const
+    {
+        if (index >= S)
+            throw std::out_of_range("Array::at: index >= S\n");
+
+        return m_elements[index];
+    }
+
+    constexpr reference operator[](size_t index) { return m_elements[index]; }
+    constexpr const_reference operator[](size_t index) const { return m_elements[index]; }
 
     constexpr void fill(const T& value)
     {
@@ -72,25 +97,6 @@ struct Array
         for (iterator i = begin(), j = other.begin(); i < end(); ++i, ++j)
             std::iter_swap(i, j);
     }
-
-    constexpr T& at(size_t index)
-    {
-        if (index >= S)
-            throw std::out_of_range("Array::at: index >= S\n");
-
-        return m_elements[index];
-    }
-
-    constexpr const T& at(size_t index) const
-    {
-        if (index >= S)
-            throw std::out_of_range("Array::at: index >= S\n");
-
-        return m_elements[index];
-    }
-
-    constexpr T& operator[](size_t index) { return m_elements[index]; }
-    constexpr const T& operator[](size_t index) const { return m_elements[index]; }
 
     typename ArrayTraits<T, S>::type m_elements;
 };
