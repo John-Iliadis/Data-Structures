@@ -144,7 +144,7 @@ class SinglyLinkedList
 public:
     using value_type = T;
     using reference = T&;
-    using const_refernce = const T&;
+    using const_reference = const T&;
     using pointer = T*;
     using const_pointer = const T*;
     using node = SinglyListNode<T>;
@@ -152,27 +152,89 @@ public:
     using const_iterator = SinglyLinkedListConstIterator<T>;
 
 public:
-    SinglyLinkedList() : m_head(nullptr) {}
+    SinglyLinkedList() noexcept : m_head(nullptr) {}
 
-    SinglyLinkedList(size_t count, const T& value)
+    SinglyLinkedList(size_t count, const_reference value)
+        : m_head(nullptr)
     {
-        m_head = nullptr;
-        node* tail = nullptr;
+        while (count--) push_back(value);
+    }
 
-        for (; count; --count)
+    SinglyLinkedList(size_t count)
+        : SinglyLinkedList(count, value_type())
+    {
+    }
+
+    ~SinglyLinkedList() { clear(); }
+
+    SinglyLinkedList(const SinglyLinkedList& other)
+        : m_head(nullptr)
+    {
+        for (auto itr = other.begin(); itr != other.end(); ++itr)
+            push_back(*itr);
+    }
+
+    SinglyLinkedList& operator=(const SinglyLinkedList& other)
+    {
+        clear();
+
+        if (this != &other)
         {
-            node* new_node = new node(value);
+            for (auto itr = other.begin(); itr != other.end(); ++itr)
+                push_back(*itr);
+        }
 
-            if (!m_head)
-            {
-                m_head = new_node;
-                tail = new_node;
-            }
-            else
-            {
-                tail->m_next = new_node;
-                tail = new_node;
-            }
+        return *this;
+    }
+
+    SinglyLinkedList(SinglyLinkedList&& other) noexcept
+        : m_head(other.m_head)
+    {
+        other.m_head = nullptr;
+    }
+
+    SinglyLinkedList& operator=(SinglyLinkedList&& other) noexcept
+    {
+        if (this != &other)
+        {
+            m_head = other.m_head;
+            other.m_head = nullptr;
+        }
+
+        return *this;
+    }
+
+    void push_back(const_reference value)
+    {
+        node* new_node = new node(value);
+
+        if (!m_head)
+        {
+            m_head = new_node;
+            return;
+        }
+
+        auto current = m_head;
+
+        while (current->m_next)
+            current = current->m_next;
+
+        current->m_next = new_node;
+    }
+
+    iterator begin() noexcept { return iterator(m_head); }
+    const_iterator begin() const noexcept { return const_iterator(m_head); }
+
+    iterator end() noexcept { return iterator(nullptr); }
+    const_iterator end() const noexcept { return const_iterator(nullptr); }
+
+    void clear()
+    {
+        while (m_head)
+        {
+            auto temp = m_head;
+            m_head = m_head->m_next;
+            delete temp;
         }
     }
 
