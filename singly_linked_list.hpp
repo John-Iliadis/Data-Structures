@@ -86,6 +86,11 @@ struct SinglyLinkedListIterator
         return m_node != other.m_node;
     }
 
+    operator bool() const noexcept
+    {
+        return m_node != nullptr;
+    }
+
     node* m_node;
 };
 
@@ -135,6 +140,11 @@ struct SinglyLinkedListConstIterator
         return m_node != other.m_node;
     }
 
+    operator bool() const noexcept
+    {
+        return m_node != nullptr;
+    }
+
     const_node* m_node;
 };
 
@@ -145,6 +155,7 @@ public:
     using value_type = T;
     using reference = T&;
     using const_reference = const T&;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using const_pointer = const T*;
     using node = SinglyListNode<T>;
@@ -204,6 +215,58 @@ public:
         return *this;
     }
 
+    iterator begin() noexcept { return iterator(m_head); }
+    iterator end() noexcept { return iterator(nullptr); }
+
+    const_iterator cbegin() const noexcept { return const_iterator(m_head); }
+    const_iterator cend() const noexcept { return const_iterator(nullptr); }
+
+    reference front()
+    {
+        if (!m_head) __builtin_trap();
+        return m_head->m_value;
+    }
+    const_reference front() const
+    {
+        if (!m_head) __builtin_trap();
+        return m_head->m_value;
+    }
+
+    reference back()
+    {
+        if (!m_head) __builtin_trap();
+
+        auto current = m_head;
+
+        while (current->m_next)
+            current = current->m_next;
+
+        return current->m_value;
+    }
+
+    const_reference back() const
+    {
+        if (!m_head) __builtin_trap();
+
+        auto current = m_head;
+
+        while (current->m_next)
+            current = current->m_next;
+
+        return current->m_value;
+    }
+
+    bool empty() const noexcept { return m_head == nullptr; }
+
+    void push_front(const_reference value)
+    {
+        node* new_node = new node(value);
+
+        new_node->m_next = m_head;
+
+        m_head = new_node;
+    }
+
     void push_back(const_reference value)
     {
         node* new_node = new node(value);
@@ -222,11 +285,129 @@ public:
         current->m_next = new_node;
     }
 
-    iterator begin() noexcept { return iterator(m_head); }
-    const_iterator begin() const noexcept { return const_iterator(m_head); }
+    void pop_front()
+    {
+        if (m_head == nullptr) __builtin_trap();
 
-    iterator end() noexcept { return iterator(nullptr); }
-    const_iterator end() const noexcept { return const_iterator(nullptr); }
+        auto temp = m_head;
+
+        m_head = m_head->m_next;
+
+        delete temp;
+    }
+
+    void pop_back()
+    {
+        if (m_head == nullptr) __builtin_trap();
+
+        if (m_head->m_next == nullptr)
+        {
+            delete m_head;
+            m_head = nullptr;
+            return;
+        }
+
+        if (m_head->m_next->m_next == nullptr)
+        {
+            delete m_head->m_next;
+            m_head->m_next = nullptr;
+            return;
+        }
+
+        auto current = m_head;
+
+        while (current->m_next->m_next)
+            current = current->m_next;
+
+        delete current->m_next;
+        current->m_next = nullptr;
+    }
+
+    void reverse()
+    {
+        node* current = m_head;
+        node* next = nullptr;
+        node* prev = nullptr;
+
+        while (current)
+        {
+            next = current->m_next;
+            current->m_next = prev;
+            prev = current;
+            current = next;
+        }
+
+        m_head = prev;
+    }
+
+    bool erase(const_reference value)
+    {
+        if (!m_head) return false;
+
+        if (m_head->m_value == value)
+        {
+            auto temp = m_head->m_next;
+            delete m_head;
+            m_head = temp;
+            return true;
+        }
+
+        auto current = m_head;
+
+        while (current->m_next != nullptr && current->m_next->m_value != value)
+            current = current->m_next;
+
+        if (current->m_next == nullptr)
+            return false;
+
+        auto temp = current->m_next->m_next;
+
+        delete current->m_next;
+        current->m_next = temp;
+
+        return true;
+    }
+
+    void erase_all_of(const_reference value)
+    {
+        while (m_head && m_head->m_value == value)
+        {
+            auto next = m_head->m_next;
+            delete m_head;
+            m_head = next;
+        }
+
+        auto current = m_head;
+
+        while (current && current->m_next)
+        {
+            if (current->m_next->m_value == value)
+            {
+                auto next = current->m_next->m_next;
+                delete current->m_next;
+                current->m_next = next;
+            }
+            else
+            {
+                current = current->m_next;
+            }
+        }
+    }
+
+    bool search(const_reference value) const
+    {
+        auto current = cbegin();
+
+        while (current)
+        {
+            if (*current == value)
+                return true;
+
+            ++current;
+        }
+
+        return false;
+    }
 
     void clear()
     {
@@ -235,17 +416,6 @@ public:
             auto temp = m_head;
             m_head = m_head->m_next;
             delete temp;
-        }
-    }
-
-    void print() const
-    {
-        auto current = m_head;
-
-        while (current)
-        {
-            std::cout << current->m_value << '\n';
-            current = current->m_next;
         }
     }
 
