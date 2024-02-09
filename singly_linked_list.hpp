@@ -10,29 +10,20 @@
 
 
 template <typename T>
-struct _SinglyLinkedListNode
+struct SinglyListNode
 {
-    using value_type = T;
-    using reference = value_type&;
-    using const_reference = const value_type&;
-    
-    value_type m_value;
-    _SinglyLinkedListNode* m_next;
+    T m_value;
+    SinglyListNode* m_next;
 
-    template<typename... Args>
-    _SinglyLinkedListNode(Args&&... args)
-        : m_value(std::forward<Args>(args)...)
-        , m_next(nullptr) {}
+    SinglyListNode(const T& value = T(), SinglyListNode* next = nullptr)
+        : m_value(value), m_next(next) {}
 
-    _SinglyLinkedListNode(const_reference value = T())
-        : m_value(value), m_next(nullptr) {}
-
-    _SinglyLinkedListNode(_SinglyLinkedListNode&& other) noexcept
+    SinglyListNode(SinglyListNode&& other) noexcept
         : m_value(std::move(other.m_value))
         , m_next(other.m_next)
     { other.m_next = nullptr; }
 
-    _SinglyLinkedListNode& operator=(_SinglyLinkedListNode&& other) noexcept
+    SinglyListNode& operator=(SinglyListNode&& other) noexcept
     {
         if (this != &other)
         {
@@ -45,22 +36,22 @@ struct _SinglyLinkedListNode
         return *this;
     }
 
-    _SinglyLinkedListNode(const _SinglyLinkedListNode&) = delete;
-    _SinglyLinkedListNode& operator=(const _SinglyLinkedListNode&) = delete;
+    SinglyListNode(const SinglyListNode&) = delete;
+    SinglyListNode& operator=(const SinglyListNode&) = delete;
 };
 
 
 template <typename T>
-struct _SinglyLinkedListIterator
+struct SinglyLinkedListIterator
 {
-    using iterator = _SinglyLinkedListIterator<T>;
-    using node = _SinglyLinkedListNode<T>;
+    using iterator = SinglyLinkedListIterator<T>;
+    using node = SinglyListNode<T>;
 
     using pointer = T*;
     using reference = T&;
 
-    _SinglyLinkedListIterator() : m_node(nullptr) {}
-    _SinglyLinkedListIterator(node* node) : m_node(node) {}
+    SinglyLinkedListIterator() : m_node(nullptr) {}
+    SinglyLinkedListIterator(node* node) : m_node(node) {}
 
     pointer operator->() const noexcept
     {
@@ -105,16 +96,16 @@ struct _SinglyLinkedListIterator
 
 
 template <typename T>
-struct _SinglyLinkedListConstIterator
+struct SinglyLinkedListConstIterator
 {
-    using const_iterator = _SinglyLinkedListConstIterator<T>;
-    using const_node = const _SinglyLinkedListNode<T>;
+    using const_iterator = SinglyLinkedListConstIterator<T>;
+    using const_node = const SinglyListNode<T>;
 
     using const_pointer = const T*;
     using const_reference = const T&;
 
-    _SinglyLinkedListConstIterator() : m_node(nullptr) {}
-    _SinglyLinkedListConstIterator(const_node* node) : m_node(node) {}
+    SinglyLinkedListConstIterator() : m_node(nullptr) {}
+    SinglyLinkedListConstIterator(const_node* node) : m_node(node) {}
 
     const_pointer operator->() const noexcept
     {
@@ -157,7 +148,6 @@ struct _SinglyLinkedListConstIterator
     const_node* m_node;
 };
 
-
 template <typename T>
 class SinglyLinkedList
 {
@@ -168,9 +158,9 @@ public:
     using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using const_pointer = const T*;
-    using node = _SinglyLinkedListNode<T>;
-    using iterator = _SinglyLinkedListIterator<T>;
-    using const_iterator = _SinglyLinkedListConstIterator<T>;
+    using node = SinglyListNode<T>;
+    using iterator = SinglyLinkedListIterator<T>;
+    using const_iterator = SinglyLinkedListConstIterator<T>;
 
 public:
     SinglyLinkedList() noexcept : m_head(nullptr) {}
@@ -280,37 +270,6 @@ public:
     void push_back(const_reference value)
     {
         node* new_node = new node(value);
-
-        if (!m_head)
-        {
-            m_head = new_node;
-            return;
-        }
-
-        auto current = m_head;
-
-        while (current->m_next)
-            current = current->m_next;
-
-        current->m_next = new_node;
-    }
-
-    template<typename... Args>
-    void emplace_front(Args&&... args)
-    {
-        node* new_node = new node(std::forward<Args>(args)...);
-
-        auto next = m_head;
-
-        m_head = new_node;
-
-        new_node->m_next = next;
-    }
-
-    template<typename... Args>
-    void emplace_back(Args&&... args)
-    {
-        node* new_node = new node(std::forward<Args>(args)...);
 
         if (!m_head)
         {
