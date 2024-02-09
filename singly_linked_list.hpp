@@ -224,11 +224,13 @@ public:
     reference front()
     {
         if (!m_head) __builtin_trap();
+
         return m_head->m_value;
     }
     const_reference front() const
     {
         if (!m_head) __builtin_trap();
+
         return m_head->m_value;
     }
 
