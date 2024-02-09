@@ -12,11 +12,20 @@
 template <typename T>
 struct SinglyListNode
 {
-    T m_value;
+    using value_type = T;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    
+    value_type m_value;
     SinglyListNode* m_next;
 
-    SinglyListNode(const T& value = T(), SinglyListNode* next = nullptr)
-        : m_value(value), m_next(next) {}
+    template<typename... Args>
+    SinglyListNode(Args&&... args)
+        : m_value(std::forward<Args>(args)...)
+        , m_next(nullptr) {}
+
+    SinglyListNode(const_reference value = T())
+        : m_value(value), m_next(nullptr) {}
 
     SinglyListNode(SinglyListNode&& other) noexcept
         : m_value(std::move(other.m_value))
@@ -148,6 +157,7 @@ struct SinglyLinkedListConstIterator
     const_node* m_node;
 };
 
+
 template <typename T>
 class SinglyLinkedList
 {
@@ -270,6 +280,37 @@ public:
     void push_back(const_reference value)
     {
         node* new_node = new node(value);
+
+        if (!m_head)
+        {
+            m_head = new_node;
+            return;
+        }
+
+        auto current = m_head;
+
+        while (current->m_next)
+            current = current->m_next;
+
+        current->m_next = new_node;
+    }
+
+    template<typename... Args>
+    void emplace_front(Args&&... args)
+    {
+        node* new_node = new node(std::forward<Args>(args)...);
+
+        auto next = m_head;
+
+        m_head = new_node;
+
+        new_node->m_next = next;
+    }
+
+    template<typename... Args>
+    void emplace_back(Args&&... args)
+    {
+        node* new_node = new node(std::forward<Args>(args)...);
 
         if (!m_head)
         {
