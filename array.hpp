@@ -33,7 +33,6 @@ template <typename T, size_t S>
 struct Array
 {
     typedef T value_type;
-    typedef size_t size_type;
     typedef value_type* pointer;
     typedef const value_type* const_pointer;
     typedef value_type& reference;
@@ -61,7 +60,7 @@ struct Array
     constexpr reference back() noexcept { return m_elements[S - 1]; }
     constexpr const_reference back() const noexcept { return m_elements[S - 1]; }
 
-    constexpr size_type size() const noexcept { return S; }
+    constexpr size_t size() const noexcept { return S; }
     constexpr bool empty() const noexcept { return S; }
 
     constexpr pointer data() noexcept { return m_elements; }
