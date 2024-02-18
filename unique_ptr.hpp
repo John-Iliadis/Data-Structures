@@ -46,6 +46,7 @@ public:
 
     constexpr unique_ptr(std::nullptr_t) noexcept
         : unique_ptr()
+        , m_deleter()
     {
     }
 
